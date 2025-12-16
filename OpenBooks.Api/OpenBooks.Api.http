@@ -1,0 +1,6 @@
+@OpenBooks.Api_HostAddress = http://localhost:5157
+
+GET {{OpenBooks.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
