@@ -31,6 +31,7 @@ namespace OpenBooks.Infrastructure.Persistence.Configurations.Libros
                    .HasPrecision(3, 1); 
 
             builder.Property(x => x.FechaPublicacion)
+                   .HasColumnType("timestamp without time zone")
                    .IsRequired();
 
             builder

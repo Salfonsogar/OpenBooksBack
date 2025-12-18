@@ -17,12 +17,15 @@ namespace OpenBooks.Application.Profiles.Libros
                 .ForMember(dest => dest.Resenas, opt => opt.Ignore())
                 .ForMember(dest => dest.BibliotecaLibros, opt => opt.Ignore())
                 .ForMember(dest => dest.EstanteriaLibros, opt => opt.Ignore())
+                .ForMember(dest => dest.Portada, opt => opt.Ignore())
+                .ForMember(dest => dest.Archivo, opt => opt.Ignore())
                 .ForMember(dest => dest.LibroCategorias, opt => opt.MapFrom(src =>
                     src.CategoriasIds.Select(id => new LibroCategoria
                     {
                         CategoriaId = id
-                    })
+                    }).ToList()
                 ));
+
 
             CreateMap<LibroUpdateDto, Libro>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
@@ -34,7 +37,7 @@ namespace OpenBooks.Application.Profiles.Libros
                     src.CategoriasIds.Select(id => new LibroCategoria
                     {
                         CategoriaId = id
-                    })
+                    }).ToList()
                 ));
 
             CreateMap<LibroPatchDto, Libro>()
@@ -44,18 +47,13 @@ namespace OpenBooks.Application.Profiles.Libros
 
             CreateMap<Libro, LibroCardDto>();
 
-            CreateMap<Libro, LibroDetailDto>()
-                .ForMember(dest => dest.Categorias, opt => opt.MapFrom(src =>
-                    src.LibroCategorias.Select(lc => new LibroCategoriaDto
-                    {
-                        CategoriaId = lc.CategoriaId,
-                        Nombre = lc.Categoria.Nombre
-                    })
-                ));
-
             CreateMap<LibroCategoria, LibroCategoriaDto>()
                 .ForMember(dest => dest.CategoriaId, opt => opt.MapFrom(src => src.CategoriaId))
                 .ForMember(dest => dest.Nombre, opt => opt.MapFrom(src => src.Categoria.Nombre));
+
+            CreateMap<Libro, LibroDetailDto>()
+                .ForMember(dest => dest.Categorias, opt => opt.MapFrom(src => src.LibroCategorias));
+
         }
     }
 }

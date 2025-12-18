@@ -17,7 +17,8 @@ namespace OpenBooks.Api.Controllers.Libros
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] LibroCreateDto dto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Create([FromForm] LibroCreateDto dto)
         {
             var result = await _libroService.CreateAsync(dto);
 
@@ -26,7 +27,7 @@ namespace OpenBooks.Api.Controllers.Libros
 
             return CreatedAtAction(
                 nameof(GetById),
-                new { id = result.Data },
+                new { id = result.Data.Id },
                 result.Data
             );
         }
@@ -84,6 +85,24 @@ namespace OpenBooks.Api.Controllers.Libros
                 return NotFound(result.Error);
 
             return NoContent();
+        }
+        [HttpGet("recommended")]
+        public async Task<IActionResult> GetRecommended([FromQuery]PaginationParams pagination)
+        {
+            var result = await _libroService.GetRecommendedAsync(pagination);
+            return Ok(result);
+        }
+        [HttpGet("TopRated")]
+        public async Task<IActionResult> GetTopRated([FromQuery] PaginationParams pagination)
+        {
+            var result = await _libroService.GetTopRatedAsync(pagination);
+            return Ok(result);
+        }
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] LibroSearchParams searchParams)
+        {
+            var result = await _libroService.SearchAsync(searchParams);
+            return Ok(result);
         }
     }
 }

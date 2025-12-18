@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using OpenBooksBack.Infrastructure.Data;
@@ -11,9 +12,11 @@ using OpenBooksBack.Infrastructure.Data;
 namespace OpenBooks.Infrastructure.Migrations
 {
     [DbContext(typeof(OpenBooksContext))]
-    partial class OpenBooksContextModelSnapshot : ModelSnapshot
+    [Migration("20251217214841_fixFechaPublicacionLibro")]
+    partial class fixFechaPublicacionLibro
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

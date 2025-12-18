@@ -14,7 +14,6 @@ namespace OpenBooks.Infrastructure.Repository.Implementations.Libros
             : base(context)
         {
         }
-
         public async Task<Libro?> GetByIdWithCategoriasAsync(int id)
         {
             return await _context.Libros

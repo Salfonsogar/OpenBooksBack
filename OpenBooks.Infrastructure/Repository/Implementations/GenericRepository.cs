@@ -59,12 +59,12 @@ namespace OpenBooksBack.Infrastructure.Repositories
             params Expression<Func<T, object>>[] includes
         )
         {
-            IQueryable<T> query = _dbSet;
+            IQueryable<T> query = _dbSet.AsNoTracking();
 
             if (filter != null)
                 query = query.Where(filter);
 
-            if (includes != null && includes.Length > 0)
+            if (includes?.Length > 0)
             {
                 foreach (var include in includes)
                 {
