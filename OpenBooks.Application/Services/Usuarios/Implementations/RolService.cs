@@ -3,7 +3,6 @@ using OpenBooks.Application.Common;
 using OpenBooks.Application.DTOs.Usuarios;
 using OpenBooks.Application.Services.Usuarios.Interfaces;
 using OpenBooks.Domain.Entities.Usuarios;
-using OpenBooksBack.Infrastructure.UnitOfWork;
 using System;
 using System.Linq;
 using System.Threading.Tasks;

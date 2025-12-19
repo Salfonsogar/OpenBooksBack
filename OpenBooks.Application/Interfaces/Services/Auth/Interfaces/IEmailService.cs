@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace OpenBooks.Infrastructure.Services.Auth.Interfaces
+namespace OpenBooks.Application.Interfaces.Services.Auth.Interfaces
 {
     public interface IEmailService
     {

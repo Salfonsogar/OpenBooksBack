@@ -2,6 +2,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\OpenBooks.Domain\OpenBooks.Domain.csproj" />
+		<ProjectReference Include="..\OpenBooks.Application\OpenBooks.Application.csproj"/>
 	</ItemGroup>
 
 	<ItemGroup>

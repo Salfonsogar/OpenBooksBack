@@ -1,9 +1,9 @@
-﻿using OpenBooks.Infrastructure.Repository.Interfaces.Auth;
-using OpenBooks.Infrastructure.Repository.Interfaces.Comentarios;
-using OpenBooks.Infrastructure.Repository.Interfaces.Libros;
-using OpenBooks.Infrastructure.Repository.Interfaces.Usuarios;
+﻿using OpenBooks.Application.Interfaces.Persistence.Usuarios;
+using OpenBooks.Application.Interfaces.Persistence.Auth;
+using OpenBooks.Application.Interfaces.Persistence.Libros;
+using OpenBooks.Application.Interfaces.Persistence.Comentarios;
 
-namespace OpenBooksBack.Infrastructure.UnitOfWork
+namespace OpenBooks.Application.Common
 {
     public interface IUnitOfWork : IDisposable
     {

@@ -1,17 +1,9 @@
 ﻿using AutoMapper;
 using FluentValidation;
-using MailKit.Search;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using OpenBooks.Application.Common;
 using OpenBooks.Application.DTOs.Libros;
 using OpenBooks.Application.Services.Libros.Interfaces;
 using OpenBooks.Domain.Entities.Libros;
-using OpenBooksBack.Infrastructure.UnitOfWork;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OpenBooks.Application.Services.Libros.Implementations
 {
@@ -45,15 +37,13 @@ namespace OpenBooks.Application.Services.Libros.Implementations
                 return Result<LibroDetailDto>.Failure(validation.Errors.First().ErrorMessage);
 
             var libro = _mapper.Map<Libro>(dto);
-            libro.Portada = await ToByteArrayAsync(dto.Portada);
-            libro.Archivo = await ToByteArrayAsync(dto.Archivo);
 
             await _unitOfWork.Libros.AddAsync(libro);
             await _unitOfWork.CommitAsync();
 
             var libroDto = await GetLibroDetailDtoAsync(libro.Id);
 
-            return Result<LibroDetailDto>.Success(libroDto);
+            return libroDto;
         }
         public async Task<Result> UpdateAsync(int id, LibroUpdateDto dto)
         {
@@ -157,7 +147,6 @@ namespace OpenBooks.Application.Services.Libros.Implementations
         {
             var query = _unitOfWork.Libros
                 .Query()
-                .AsNoTracking()
                 .Where(l => l.ValoracionPromedio > 0)
                 .OrderByDescending(l => l.ValoracionPromedio)
                 .Select(l => new LibroCardDto
@@ -210,33 +199,15 @@ namespace OpenBooks.Application.Services.Libros.Implementations
 
             return Result<PagedResult<LibroCardDto>>.Success(paged);
         }
-        private static async Task<byte[]> ToByteArrayAsync(IFormFile file)
+        private async Task<Result<LibroDetailDto>> GetLibroDetailDtoAsync(int libroId)
         {
-            using var ms = new MemoryStream();
-            await file.CopyToAsync(ms);
-            return ms.ToArray();
-        }
-        private async Task<LibroDetailDto> GetLibroDetailDtoAsync(int libroId)
-        {
-            return await _unitOfWork.Libros.Query()
-                .Where(l => l.Id == libroId)
-                .Select(l => new LibroDetailDto
-                {
-                    Id = l.Id,
-                    Titulo = l.Titulo,
-                    Autor = l.Autor,
-                    Descripcion = l.Descripcion,
-                    FechaPublicacion = l.FechaPublicacion,
-                    ValoracionPromedio = l.ValoracionPromedio,
-                    Portada = l.Portada,
+            var libroDto = await _unitOfWork.Libros.GetDetailAsync(libroId);
 
-                    Categorias = l.LibroCategorias.Select(lc => new LibroCategoriaDto
-                    {
-                        CategoriaId = lc.CategoriaId,
-                        Nombre = lc.Categoria.Nombre
-                    }).ToList()
-                })
-                .FirstAsync();
+            if (libroDto == null)
+                return Result<LibroDetailDto>.Failure("El libro no existe");
+
+            return Result<LibroDetailDto>.Success(libroDto);
+
         }
     }
 }

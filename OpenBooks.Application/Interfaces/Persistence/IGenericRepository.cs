@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace OpenBooksBack.Infrastructure.Repositories
+namespace OpenBooks.Application.Interfaces.Persistence
 {
     public interface IGenericRepository<T> where T : class
     {

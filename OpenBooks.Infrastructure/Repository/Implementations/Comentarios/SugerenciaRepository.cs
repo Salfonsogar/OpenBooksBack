@@ -1,11 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using OpenBooks.Application.Interfaces.Persistence.Comentarios;
 using OpenBooks.Domain.Entities.Comentarios;
-using OpenBooks.Infrastructure.Repository.Interfaces.Comentarios;
 using OpenBooksBack.Infrastructure.Data;
 using OpenBooksBack.Infrastructure.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OpenBooks.Infrastructure.Repository.Implementations.Comentarios
 {

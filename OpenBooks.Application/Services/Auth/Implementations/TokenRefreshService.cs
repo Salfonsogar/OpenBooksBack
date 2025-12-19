@@ -2,8 +2,7 @@
 using OpenBooks.Application.DTOs.Auth;
 using OpenBooks.Application.Services.Auth.Interfaces;
 using OpenBooks.Domain.Entities.Auth;
-using OpenBooks.Infrastructure.Services.Auth.Interfaces;
-using OpenBooksBack.Infrastructure.UnitOfWork;
+using OpenBooks.Application.Interfaces.Services.Auth.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;

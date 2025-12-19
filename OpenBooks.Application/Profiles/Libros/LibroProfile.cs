@@ -17,8 +17,6 @@ namespace OpenBooks.Application.Profiles.Libros
                 .ForMember(dest => dest.Resenas, opt => opt.Ignore())
                 .ForMember(dest => dest.BibliotecaLibros, opt => opt.Ignore())
                 .ForMember(dest => dest.EstanteriaLibros, opt => opt.Ignore())
-                .ForMember(dest => dest.Portada, opt => opt.Ignore())
-                .ForMember(dest => dest.Archivo, opt => opt.Ignore())
                 .ForMember(dest => dest.LibroCategorias, opt => opt.MapFrom(src =>
                     src.CategoriasIds.Select(id => new LibroCategoria
                     {

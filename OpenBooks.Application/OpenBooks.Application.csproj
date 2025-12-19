@@ -2,7 +2,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\OpenBooks.Domain\OpenBooks.Domain.csproj" />
-		<ProjectReference Include="..\OpenBooks.Infrastructure\OpenBooks.Infrastructure.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

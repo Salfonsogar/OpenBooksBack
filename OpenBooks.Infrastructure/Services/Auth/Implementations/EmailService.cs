@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using MimeKit;
-using OpenBooks.Infrastructure.Services.Auth.Interfaces;
+using OpenBooks.Application.Interfaces.Services.Auth.Interfaces;
 
 namespace OpenBooks.Infrastructure.Services.Auth.Implementations
 {

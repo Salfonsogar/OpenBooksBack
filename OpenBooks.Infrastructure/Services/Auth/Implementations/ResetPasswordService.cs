@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using OpenBooks.Infrastructure.Services.Auth.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using OpenBooks.Application.Interfaces.Services.Auth.Interfaces;
 
 namespace OpenBooks.Infrastructure.Services.Auth.Implementations
 {

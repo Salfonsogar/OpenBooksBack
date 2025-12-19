@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using OpenBooks.Application.Commands.Auth;
-using OpenBooks.Infrastructure.Services.Auth.Interfaces;
+using OpenBooks.Application.Interfaces.Services.Auth.Interfaces;
 
 namespace OpenBooks.Application.Handlers.Auth
 {

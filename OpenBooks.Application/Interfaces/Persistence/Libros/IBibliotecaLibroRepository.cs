@@ -1,10 +1,9 @@
 ﻿using OpenBooks.Domain.Entities.Libros;
-using OpenBooksBack.Infrastructure.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace OpenBooks.Infrastructure.Repository.Interfaces.Libros
+namespace OpenBooks.Application.Interfaces.Persistence.Libros
 {
     public interface IBibliotecaLibroRepository : IGenericRepository<BibliotecaLibro>
     {

@@ -1,29 +1,20 @@
-﻿using Microsoft.AspNetCore.Http;
-using OpenBooks.Application.Common;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using OpenBooks.Application.Common;
 
 namespace OpenBooks.Application.DTOs.Libros
 {
     public class LibroCreateDto
     {
-        [Required]
         public string Titulo { get; set; } = string.Empty;
-        [Required]
         public string Autor { get; set; } = string.Empty;
-        public string? Descripcion { get; set; } = string.Empty;
-        [Required(ErrorMessage = "La portada es obligatoria")]
-        public IFormFile Portada { get; set; }
-        [Required(ErrorMessage = "El archivo del libro es obligatorio")]
-        public IFormFile Archivo { get; set; }
-        [Required]
+        public string? Descripcion { get; set; }
+
+        public byte[] Portada { get; set; } = Array.Empty<byte>();
+        public byte[] Archivo { get; set; } = Array.Empty<byte>();
+
         public DateTime FechaPublicacion { get; set; }
-        [Required]
-        [MinLength(1, ErrorMessage = "Debe seleccionar al menos una categoría")]
         public ICollection<int> CategoriasIds { get; set; } = new List<int>();
     }
+
 
     public class LibroUpdateDto
     {

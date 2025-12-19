@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using OpenBooks.Application.Interfaces.Persistence.Auth;
 using OpenBooks.Domain.Entities.Auth;
-using OpenBooks.Infrastructure.Repository.Interfaces.Auth;
 using OpenBooksBack.Infrastructure.Data;
 using OpenBooksBack.Infrastructure.Repositories;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace OpenBooks.Infrastructure.Repository.Implementations.Auth
 {

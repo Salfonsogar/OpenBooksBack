@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using OpenBooks.Application.Interfaces.Persistence.Usuarios;
 using OpenBooks.Domain.Entities.Usuarios;
-using OpenBooks.Infrastructure.Repository.Interfaces.Usuarios;
 using OpenBooksBack.Infrastructure.Data;
 using OpenBooksBack.Infrastructure.Repositories;
 using System;

@@ -1,12 +1,13 @@
-﻿using OpenBooks.Domain.Entities.Auth;
+﻿
+using OpenBooks.Application.Common;
+using OpenBooks.Application.Interfaces.Persistence.Auth;
+using OpenBooks.Application.Interfaces.Persistence.Comentarios;
+using OpenBooks.Application.Interfaces.Persistence.Libros;
+using OpenBooks.Application.Interfaces.Persistence.Usuarios;
 using OpenBooks.Infrastructure.Repository.Implementations.Auth;
 using OpenBooks.Infrastructure.Repository.Implementations.Comentarios;
 using OpenBooks.Infrastructure.Repository.Implementations.Libros;
 using OpenBooks.Infrastructure.Repository.Implementations.Usuarios;
-using OpenBooks.Infrastructure.Repository.Interfaces.Auth;
-using OpenBooks.Infrastructure.Repository.Interfaces.Comentarios;
-using OpenBooks.Infrastructure.Repository.Interfaces.Libros;
-using OpenBooks.Infrastructure.Repository.Interfaces.Usuarios;
 using OpenBooksBack.Infrastructure.Data;
 
 namespace OpenBooksBack.Infrastructure.UnitOfWork

@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using OpenBooks.Api.Dtos.Libros;
 using OpenBooks.Application.Common;
 using OpenBooks.Application.DTOs.Libros;
+using OpenBooks.Application.Handlers.Lector;
 using OpenBooks.Application.Services.Libros.Interfaces;
 
 namespace OpenBooks.Api.Controllers.Libros
@@ -10,28 +14,37 @@ namespace OpenBooks.Api.Controllers.Libros
     public class LibrosController : ControllerBase
     {
         private readonly ILibroService _libroService;
+        private readonly IMediator _mediator;
 
-        public LibrosController(ILibroService libroService)
+        public LibrosController(ILibroService libroService, IMediator mediator)
         {
             _libroService = libroService;
+            _mediator = mediator;
         }
 
         [HttpPost]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> Create([FromForm] LibroCreateDto dto)
+        public async Task<IActionResult> Create([FromBody] LibroCreateRequest request)
         {
+            using var portadaMs = new MemoryStream();
+            await request.Portada.CopyToAsync(portadaMs);
+
+            using var archivoMs = new MemoryStream();
+            await request.Archivo.CopyToAsync(archivoMs);
+            var dto = new LibroCreateDto
+            {
+                Titulo = request.Titulo,
+                Autor = request.Autor,
+                Descripcion = request.Descripcion,
+                FechaPublicacion = request.FechaPublicacion,
+                CategoriasIds = request.CategoriasIds,
+                Portada = portadaMs.ToArray(),
+                Archivo = archivoMs.ToArray()
+            };
             var result = await _libroService.CreateAsync(dto);
-
-            if (!result.IsSuccess)
-                return BadRequest(result.Error);
-
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = result.Data.Id },
-                result.Data
-            );
+            if (!result.IsSuccess) return BadRequest(result.Error);
+            return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result.Data);
         }
-
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] LibroUpdateDto dto)
         {
@@ -103,6 +116,13 @@ namespace OpenBooks.Api.Controllers.Libros
         {
             var result = await _libroService.SearchAsync(searchParams);
             return Ok(result);
+        }
+        [HttpGet("{id:int}/manifest")]
+        [Produces("application/webpub+json")]
+        public async Task<IActionResult> GetManifest(int id)
+        {
+            var manifest = await _mediator.Send(new GetBookManifestQuery(id));
+            return Ok(manifest);
         }
     }
 }

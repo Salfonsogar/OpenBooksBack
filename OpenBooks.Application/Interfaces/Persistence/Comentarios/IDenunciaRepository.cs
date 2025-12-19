@@ -1,10 +1,6 @@
 ﻿using OpenBooks.Domain.Entities.Comentarios;
-using OpenBooksBack.Infrastructure.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace OpenBooks.Infrastructure.Repository.Interfaces.Comentarios
+namespace OpenBooks.Application.Interfaces.Persistence.Comentarios
 {
     public interface IDenunciaRepository : IGenericRepository<Denuncia>
     {

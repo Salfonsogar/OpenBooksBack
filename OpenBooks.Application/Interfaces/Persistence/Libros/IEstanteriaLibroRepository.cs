@@ -1,10 +1,9 @@
-﻿using OpenBooksBack.Infrastructure.Repositories;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using OpenBooks.Domain.Entities.Libros;
 
-namespace OpenBooks.Infrastructure.Repository.Interfaces.Libros
+namespace OpenBooks.Application.Interfaces.Persistence.Libros
 {
     public interface IEstanteriaLibroRepository : IGenericRepository<EstanteriaLibro>
     {

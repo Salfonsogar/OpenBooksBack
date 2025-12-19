@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using OpenBooks.Application.Interfaces.Services.Auth.Interfaces;
 using OpenBooks.Domain.Entities.Usuarios;
-using OpenBooks.Infrastructure.Services.Auth.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;

@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using OpenBooks.Application.Handlers.Auth;
+using OpenBooks.Application.Handlers.Lector;
 using OpenBooks.Application.Profiles.Libros;
 using OpenBooks.Application.Profiles.Usuarios;
 using OpenBooks.Application.Services.Auth;
@@ -32,7 +33,8 @@ namespace OpenBooks.Application.Extensions
             // MediatR
             services.AddMediatR(cfg => { 
                 cfg.RegisterServicesFromAssembly(typeof(GenerateRefreshTokenHandler).Assembly);
-                cfg.RegisterServicesFromAssembly(typeof(ForgotPasswordHandler).Assembly); 
+                cfg.RegisterServicesFromAssembly(typeof(ForgotPasswordHandler).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(GetBookManifestHandler).Assembly);
             });
 
             // Services
