@@ -12,6 +12,7 @@ using OpenBooks.Application.Services.Libros.Interfaces;
 using OpenBooks.Application.Services.Usuarios.Implementations;
 using OpenBooks.Application.Services.Usuarios.Interfaces;
 using OpenBooks.Application.Validations.Auth;
+using OpenBooks.Application.Validations.Lector;
 using OpenBooks.Application.Validations.Libros;
 using OpenBooks.Application.Validations.Usuarios;
 using OpenBooks.Domain.Entities.Usuarios;
@@ -67,6 +68,7 @@ namespace OpenBooks.Application.Extensions
             services.AddValidatorsFromAssemblyContaining<LibroCreateValidator>();
             services.AddValidatorsFromAssemblyContaining<LibroUpdateValidator>();
             services.AddValidatorsFromAssemblyContaining<LibroPatchValidator>();
+            services.AddValidatorsFromAssemblyContaining<GetBookManifestValidator>();
 
             return services;
         }

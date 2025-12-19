@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenBooks.Application.Common;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,7 +7,7 @@ namespace OpenBooks.Application.Services.Lector
 {
     public interface IEpubParser
     {
-        ParsedOpf Parse(byte[] epubContent);
+        Result<ParsedOpf> Parse(byte[] epubContent);
     }
     public class ParsedOpf
     {

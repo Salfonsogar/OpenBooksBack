@@ -1,171 +1,215 @@
 ﻿using System.IO.Compression;
 using System.Xml.Linq;
 using OpenBooks.Application.Services.Lector;
+using OpenBooks.Application.Common;
 
 namespace OpenBooks.Infrastructure.Services.Lector
 {
     public class EpubParser : IEpubParser
     {
-        public ParsedOpf Parse(byte[] epubContent)
+        public Result<ParsedOpf> Parse(byte[] epubContent)
         {
             if (epubContent == null || epubContent.Length == 0)
-                throw new InvalidDataException("El contenido del EPUB está vacío");
+                return Result<ParsedOpf>.Failure("El contenido del EPUB está vacío");
 
-            using var ms = new MemoryStream(epubContent);
-            using var zip = new ZipArchive(ms, ZipArchiveMode.Read);
-
-            // 1️⃣ container.xml
-            var containerEntry = zip.GetEntry("META-INF/container.xml")
-                ?? throw new InvalidDataException("container.xml no encontrado");
-
-            XDocument containerXml;
-            using (var s = containerEntry.Open())
-                containerXml = XDocument.Load(s);
-
-            // 2️⃣ OPF path
-            var rootFileElement = containerXml
-                .Descendants()
-                .First(e => e.Name.LocalName == "rootfile");
-
-            var opfPath = rootFileElement.Attribute("full-path")!.Value;
-            var opfDir = Path.GetDirectoryName(opfPath)?.Replace("\\", "/") ?? "";
-
-            // 3️⃣ OPF
-            var opfEntry = zip.GetEntry(opfPath)
-                ?? throw new InvalidDataException("OPF no encontrado");
-
-            XDocument opfXml;
-            using (var s = opfEntry.Open())
-                opfXml = XDocument.Load(s);
-
-            XNamespace opfNs = opfXml.Root!.Name.Namespace;
-            XNamespace dcNs = "http://purl.org/dc/elements/1.1/";
-
-            // 4️⃣ Metadata
-            var identifier = opfXml.Descendants(dcNs + "identifier").First().Value;
-            var title = opfXml.Descendants(dcNs + "title").First().Value;
-            var language = opfXml.Descendants(dcNs + "language").FirstOrDefault()?.Value ?? "und";
-
-            var authors = opfXml.Descendants(dcNs + "creator")
-                .Select(x => x.Value)
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .ToList();
-
-            // 5️⃣ Manifest
-            var manifest = opfXml
-                .Descendants(opfNs + "item")
-                .ToDictionary(
-                    i => i.Attribute("id")!.Value,
-                    i => new
-                    {
-                        Href = i.Attribute("href")!.Value,
-                        MediaType = i.Attribute("media-type")!.Value,
-                        Properties = i.Attribute("properties")?.Value
-                    });
-
-            // 6️⃣ Spine
-            var spineIds = new HashSet<string>();
-
-            var spine = opfXml
-                .Descendants(opfNs + "itemref")
-                .Select(i =>
-                {
-                    var idref = i.Attribute("idref")!.Value;
-                    spineIds.Add(idref);
-
-                    var item = manifest[idref];
-
-                    return new OpfItem
-                    {
-                        Href = item.Href,
-                        MediaType = item.MediaType
-                    };
-                })
-                .ToList();
-
-            if (!spine.Any())
-                throw new InvalidDataException("El spine del OPF está vacío");
-
-            // 7️⃣ Resources (manifest - spine)
-            var resources = manifest
-                .Where(m => !spineIds.Contains(m.Key))
-                .Select(m => new OpfItem
-                {
-                    Href = m.Value.Href,
-                    MediaType = m.Value.MediaType,
-                    Rel = m.Value.Properties?.Contains("nav") == true ? "contents" : null
-                })
-                .ToList();
-
-            // 8️⃣ TOC (nav.xhtml)
-            var toc = new List<OpfTocItem>();
-            string? navPath = null;
-
-            // EPUB 3 → nav.xhtml
-            var navItem = manifest.Values
-                .FirstOrDefault(m => m.Properties?.Contains("nav") == true);
-
-            if (navItem != null)
+            try
             {
-                navPath = string.IsNullOrEmpty(opfDir)
-                    ? navItem.Href
-                    : $"{opfDir}/{navItem.Href}";
+                using var ms = new MemoryStream(epubContent);
+                using var zip = new ZipArchive(ms, ZipArchiveMode.Read);
 
-                var navEntry = zip.GetEntry(navPath);
-                if (navEntry != null)
+                // 1️⃣ container.xml
+                var containerEntry = zip.GetEntry("META-INF/container.xml");
+                if (containerEntry == null)
+                    return Result<ParsedOpf>.Failure("container.xml no encontrado");
+
+                XDocument containerXml;
+                using (var s = containerEntry.Open())
+                    containerXml = XDocument.Load(s);
+
+                // 2️⃣ OPF path
+                var rootFileElement = containerXml
+                    .Descendants()
+                    .FirstOrDefault(e => e.Name.LocalName == "rootfile");
+
+                if (rootFileElement == null)
+                    return Result<ParsedOpf>.Failure("No se encontró el elemento rootfile en container.xml");
+
+                var opfPath = rootFileElement.Attribute("full-path")?.Value;
+                if (string.IsNullOrEmpty(opfPath))
+                    return Result<ParsedOpf>.Failure("El atributo full-path del rootfile es inválido");
+
+                var opfDir = Path.GetDirectoryName(opfPath)?.Replace("\\", "/") ?? "";
+
+                // 3️⃣ OPF
+                var opfEntry = zip.GetEntry(opfPath);
+                if (opfEntry == null)
+                    return Result<ParsedOpf>.Failure("OPF no encontrado");
+
+                XDocument opfXml;
+                using (var s = opfEntry.Open())
+                    opfXml = XDocument.Load(s);
+
+                XNamespace opfNs = opfXml.Root!.Name.Namespace;
+                XNamespace dcNs = "http://purl.org/dc/elements/1.1/";
+
+                // 4️⃣ Metadata
+                var identifierEl = opfXml.Descendants(dcNs + "identifier").FirstOrDefault();
+                var titleEl = opfXml.Descendants(dcNs + "title").FirstOrDefault();
+
+                if (identifierEl == null || string.IsNullOrWhiteSpace(identifierEl.Value))
+                    return Result<ParsedOpf>.Failure("Identificador (dc:identifier) no encontrado en OPF");
+
+                if (titleEl == null || string.IsNullOrWhiteSpace(titleEl.Value))
+                    return Result<ParsedOpf>.Failure("Título (dc:title) no encontrado en OPF");
+
+                var identifier = identifierEl.Value;
+                var title = titleEl.Value;
+                var language = opfXml.Descendants(dcNs + "language").FirstOrDefault()?.Value ?? "und";
+
+                var authors = opfXml.Descendants(dcNs + "creator")
+                    .Select(x => x.Value)
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .ToList();
+
+                // 5️⃣ Manifest
+                var items = opfXml
+                    .Descendants(opfNs + "item")
+                    .ToList();
+
+                var manifest = new Dictionary<string, (string Href, string MediaType, string? Properties)>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var i in items)
                 {
-                    XDocument navXml;
-                    using (var s = navEntry.Open())
-                        navXml = XDocument.Load(s);
+                    var id = i.Attribute("id")?.Value;
+                    var href = i.Attribute("href")?.Value;
+                    var media = i.Attribute("media-type")?.Value;
 
-                    XNamespace xhtml = "http://www.w3.org/1999/xhtml";
+                    if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(href) || string.IsNullOrEmpty(media))
+                        continue;
 
-                    var nav = navXml
-                        .Descendants(xhtml + "nav")
-                        .FirstOrDefault(n =>
-                            n.Attributes().Any(a => a.Value.Contains("toc")));
-
-                    var ol = nav?.Element(xhtml + "ol");
-                    if (ol != null)
-                        toc = ParseTocOl(ol, xhtml);
+                    manifest[id] = (href, media, i.Attribute("properties")?.Value);
                 }
-            }
-            else
-            {
-                // EPUB 2 → toc.ncx
-                var ncxItem = manifest.Values
-                    .FirstOrDefault(m => m.MediaType == "application/x-dtbncx+xml");
 
-                if (ncxItem != null)
-                {
-                    var ncxPath = string.IsNullOrEmpty(opfDir)
-                        ? ncxItem.Href
-                        : $"{opfDir}/{ncxItem.Href}";
+                // 6️⃣ Spine
+                var spineIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                    var ncxEntry = zip.GetEntry(ncxPath);
-                    if (ncxEntry != null)
+                var spine = opfXml
+                    .Descendants(opfNs + "itemref")
+                    .Select(i =>
                     {
-                        XDocument ncxXml;
-                        using (var s = ncxEntry.Open())
-                            ncxXml = XDocument.Load(s);
+                        var idref = i.Attribute("idref")?.Value ?? "";
+                        spineIds.Add(idref);
 
-                        toc = ParseNcx(ncxXml);
+                        if (!manifest.TryGetValue(idref, out var item))
+                            return null;
+
+                        var href = string.IsNullOrEmpty(opfDir) ? item.Href : $"{opfDir}/{item.Href}";
+
+                        return new OpfItem
+                        {
+                            Href = href,
+                            MediaType = item.MediaType
+                        };
+                    })
+                    .Where(x => x != null)
+                    .Cast<OpfItem>()
+                    .ToList();
+
+                if (!spine.Any())
+                    return Result<ParsedOpf>.Failure("El spine del OPF está vacío");
+
+                // 7️⃣ Resources (manifest - spine)
+                var resources = manifest
+                    .Where(m => !spineIds.Contains(m.Key))
+                    .Select(m =>
+                    {
+                        var href = string.IsNullOrEmpty(opfDir) ? m.Value.Href : $"{opfDir}/{m.Value.Href}";
+                        return new OpfItem
+                        {
+                            Href = href,
+                            MediaType = m.Value.MediaType,
+                            Rel = m.Value.Properties?.Contains("nav") == true ? "contents" : null
+                        };
+                    })
+                    .ToList();
+
+                // 8️⃣ TOC (nav.xhtml or ncx)
+                var toc = new List<OpfTocItem>();
+                string? navPath = null;
+
+                var navItem = manifest.Values
+                    .FirstOrDefault(m => m.Properties?.Contains("nav") == true);
+
+                if (navItem != default)
+                {
+                    navPath = string.IsNullOrEmpty(opfDir)
+                        ? navItem.Href
+                        : $"{opfDir}/{navItem.Href}";
+
+                    var navEntry = zip.GetEntry(navPath);
+                    if (navEntry != null)
+                    {
+                        XDocument navXml;
+                        using (var s = navEntry.Open())
+                            navXml = XDocument.Load(s);
+
+                        XNamespace xhtml = "http://www.w3.org/1999/xhtml";
+
+                        var nav = navXml
+                            .Descendants(xhtml + "nav")
+                            .FirstOrDefault(n =>
+                                n.Attributes().Any(a => a.Value.Contains("toc")));
+
+                        var ol = nav?.Element(xhtml + "ol");
+                        if (ol != null)
+                            toc = ParseTocOl(ol, xhtml);
                     }
                 }
+                else
+                {
+                    var ncxItem = manifest.Values
+                        .FirstOrDefault(m => m.MediaType == "application/x-dtbncx+xml");
+
+                    if (ncxItem != default)
+                    {
+                        var ncxPath = string.IsNullOrEmpty(opfDir)
+                            ? ncxItem.Href
+                            : $"{opfDir}/{ncxItem.Href}";
+
+                        var ncxEntry = zip.GetEntry(ncxPath);
+                        if (ncxEntry != null)
+                        {
+                            XDocument ncxXml;
+                            using (var s = ncxEntry.Open())
+                                ncxXml = XDocument.Load(s);
+
+                            toc = ParseNcx(ncxXml);
+                        }
+                    }
+                }
+
+                var parsed = new ParsedOpf
+                {
+                    Identifier = identifier,
+                    Title = title,
+                    Language = language,
+                    Authors = authors,
+                    Spine = spine,
+                    Resources = resources,
+                    Toc = toc,
+                    NavPath = navPath
+                };
+
+                return Result<ParsedOpf>.Success(parsed);
             }
-
-
-            return new ParsedOpf
+            catch (InvalidDataException ex)
             {
-                Identifier = identifier,
-                Title = title,
-                Language = language,
-                Authors = authors,
-                Spine = spine,
-                Resources = resources,
-                Toc = toc,
-                NavPath = navPath
-            };
+                return Result<ParsedOpf>.Failure($"EPUB inválido: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return Result<ParsedOpf>.Failure($"Error al parsear EPUB: {ex.Message}");
+            }
         }
 
         // 🔁 Recursivo para TOC jerárquico

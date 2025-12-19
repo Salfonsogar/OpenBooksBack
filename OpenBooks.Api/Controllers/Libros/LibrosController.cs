@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenBooks.Api.Dtos.Libros;
 using OpenBooks.Application.Common;
+using OpenBooks.Application.Commands.Lector;
 using OpenBooks.Application.DTOs.Libros;
 using OpenBooks.Application.Handlers.Lector;
 using OpenBooks.Application.Services.Libros.Interfaces;
@@ -121,8 +122,18 @@ namespace OpenBooks.Api.Controllers.Libros
         [Produces("application/webpub+json")]
         public async Task<IActionResult> GetManifest(int id)
         {
-            var manifest = await _mediator.Send(new GetBookManifestQuery(id));
-            return Ok(manifest);
+            var result = await _mediator.Send(new GetBookManifestCommand(id));
+
+            if (!result.IsSuccess)
+            {
+                var err = result.Error ?? "Error desconocido";
+                if (err.Contains("no encontrado", StringComparison.OrdinalIgnoreCase))
+                    return NotFound(err);
+
+                return BadRequest(err);
+            }
+
+            return Ok(result.Data);
         }
     }
 }
