@@ -42,4 +42,11 @@ namespace OpenBooks.Application.DTOs.Lector
         public string Title { get; set; } = string.Empty;
         public List<TocItemDto>? Children { get; set; }
     }
+
+    public class BookResourceDto
+    {
+        public byte[] Content { get; set; } = Array.Empty<byte>();
+        public string MediaType { get; set; } = "application/octet-stream";
+        public string FileName { get; set; } = string.Empty;
+    }
 }

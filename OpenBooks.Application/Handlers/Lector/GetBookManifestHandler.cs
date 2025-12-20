@@ -1,10 +1,12 @@
-﻿using MediatR;
+﻿using System.Collections.Concurrent;
+using System.Security.Cryptography;
+using MediatR;
+using Microsoft.Extensions.Caching.Memory;
 using OpenBooks.Application.Commands.Lector;
 using OpenBooks.Application.Common;
 using OpenBooks.Application.DTOs.Lector;
 using OpenBooks.Application.Interfaces.Persistence.Libros;
 using OpenBooks.Application.Services.Lector;
-using OpenBooks.Application.Validations.Lector;
 
 namespace OpenBooks.Application.Handlers.Lector
 {
@@ -12,24 +14,19 @@ namespace OpenBooks.Application.Handlers.Lector
     {
         private readonly IEpubParser _epubParser;
         private readonly ILibroRepository _repository;
-        private readonly GetBookManifestValidator _validator;
+        private readonly IMemoryCache _cache;
 
+        private static readonly ConcurrentDictionary<string, SemaphoreSlim> _locks = new();
 
-        public GetBookManifestHandler(IEpubParser epubParser, ILibroRepository repository, GetBookManifestValidator validator)
+        public GetBookManifestHandler(IEpubParser epubParser, ILibroRepository repository, IMemoryCache cache)
         {
             _epubParser = epubParser;
             _repository = repository;
-            _validator = validator;
+            _cache = cache;
         }
+
         public async Task<Result<BookManifestDto>> Handle(GetBookManifestCommand request, CancellationToken ct)
         {
-
-            var validationResult = await _validator.ValidateAsync(request, ct);
-            if (!validationResult.IsValid)
-            {
-                var errors = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
-                return Result<BookManifestDto>.Failure(errors);
-            }
             var libro = await _repository.GetByIdAsync(request.BookId);
             if (libro == null)
                 return Result<BookManifestDto>.Failure("Libro no encontrado");
@@ -37,11 +34,41 @@ namespace OpenBooks.Application.Handlers.Lector
             if (libro.Archivo is null || libro.Archivo.Length == 0)
                 return Result<BookManifestDto>.Failure("El libro no contiene un EPUB válido");
 
-            var opfResult = _epubParser.Parse(libro.Archivo);
-            if (!opfResult.IsSuccess)
-                return Result<BookManifestDto>.Failure(opfResult.Error ?? "Error al parsear EPUB");
+            var hash = ComputeHash(libro.Archivo);
+            var cacheKey = $"epub:parsed:{request.BookId}:{hash}";
 
-            var opf = opfResult.Data!;
+            if (!_cache.TryGetValue(cacheKey, out ParsedOpf? parsed))
+            {
+                var semaphore = _locks.GetOrAdd(cacheKey, _ => new SemaphoreSlim(1, 1));
+                await semaphore.WaitAsync(ct);
+                try
+                {
+                    if (!_cache.TryGetValue(cacheKey, out parsed))
+                    {
+                        var opfResult = _epubParser.Parse(libro.Archivo);
+                        if (!opfResult.IsSuccess)
+                            return Result<BookManifestDto>.Failure(opfResult.Error ?? "Error al parsear EPUB");
+
+                        parsed = opfResult.Data!;
+
+                        var cacheEntryOptions = new MemoryCacheEntryOptions
+                        {
+                            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30),
+                            SlidingExpiration = TimeSpan.FromMinutes(10),
+                            Size = 1
+                        };
+                        _cache.Set(cacheKey, parsed, cacheEntryOptions);
+                    }
+                }
+                finally
+                {
+                    semaphore.Release();
+                    _locks.TryRemove(cacheKey, out _);
+                }
+            }
+
+            if (parsed == null)
+                return Result<BookManifestDto>.Failure("No se pudo obtener el manifiesto del libro");
 
             var links = new List<LinkDto>
             {
@@ -52,9 +79,8 @@ namespace OpenBooks.Application.Handlers.Lector
                     Type = "application/webpub+json",
                 }
             };
-            var tocResource = opf.Resources
-                .FirstOrDefault(r => r.MediaType == "application/x-dtbncx+xml");
 
+            var tocResource = parsed.Resources.FirstOrDefault(r => r.MediaType == "application/x-dtbncx+xml");
             if (tocResource != null)
             {
                 links.Add(new LinkDto
@@ -69,28 +95,36 @@ namespace OpenBooks.Application.Handlers.Lector
             {
                 Metadata = new MetadataDto
                 {
-                    Identifier = opf.Identifier,
-                    Title = opf.Title,
-                    Language = opf.Language,
-                    Author = opf.Authors
+                    Identifier = parsed.Identifier,
+                    Title = parsed.Title,
+                    Language = parsed.Language,
+                    Author = parsed.Authors
                 },
                 Links = links,
-                ReadingOrder = opf.Spine.Select(i => new LinkDto
+                ReadingOrder = parsed.Spine.Select(i => new LinkDto
                 {
                     Href = i.Href,
                     Type = i.MediaType,
                     Title = i.Title
                 }).ToList(),
-                Resources = opf.Resources.Select(i => new LinkDto
+                Resources = parsed.Resources.Select(i => new LinkDto
                 {
                     Href = i.Href,
                     Type = i.MediaType
                 }).ToList(),
-                Toc = BuildToc(opf.Toc)
+                Toc = BuildToc(parsed.Toc)
             };
 
             return Result<BookManifestDto>.Success(manifest);
         }
+
+        private static string ComputeHash(byte[] data)
+        {
+            using var sha = SHA256.Create();
+            var hashBytes = sha.ComputeHash(data);
+            return Convert.ToHexString(hashBytes).ToLowerInvariant();
+        }
+
         private static List<TocItemDto> BuildToc(IEnumerable<OpfTocItem> tocItems)
         {
             if (tocItems == null || !tocItems.Any())
@@ -112,6 +146,5 @@ namespace OpenBooks.Application.Handlers.Lector
                 }).ToList()
             }).ToList();
         }
-
     }
 }

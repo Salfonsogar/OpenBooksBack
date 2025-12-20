@@ -135,5 +135,25 @@ namespace OpenBooks.Api.Controllers.Libros
 
             return Ok(result.Data);
         }
+        [HttpGet("{id:int}/resource/{*resourcePath}")]
+        public async Task<IActionResult> GetResource(int id, string resourcePath)
+        {
+            if (string.IsNullOrWhiteSpace(resourcePath))
+                return BadRequest("Se debe especificar la ruta del recurso");
+
+            var result = await _mediator.Send(new GetBookResourceCommand(id, resourcePath));
+
+            if (!result.IsSuccess)
+            {
+                var err = result.Error ?? "Error desconocido";
+                if (err.Contains("no encontrado", StringComparison.OrdinalIgnoreCase))
+                    return NotFound(err);
+
+                return BadRequest(err);
+            }
+
+            var resource = result.Data!;
+            return File(resource.Content, resource.MediaType, resource.FileName);
+        }
     }
 }

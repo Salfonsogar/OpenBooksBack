@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Caching.Memory;
 using OpenBooks.Application.Handlers.Auth;
 using OpenBooks.Application.Handlers.Lector;
 using OpenBooks.Application.Profiles.Libros;
@@ -36,6 +37,7 @@ namespace OpenBooks.Application.Extensions
                 cfg.RegisterServicesFromAssembly(typeof(GenerateRefreshTokenHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(ForgotPasswordHandler).Assembly);
                 cfg.RegisterServicesFromAssembly(typeof(GetBookManifestHandler).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(GetBookResourceHandler).Assembly);
             });
 
             // Services
@@ -49,6 +51,9 @@ namespace OpenBooks.Application.Extensions
             services.AddScoped<ICategoriaService, CategoriaService>();
             services.AddScoped<ILibroService, LibroService>();
             // comentarios
+
+            // Memory cache
+            services.AddMemoryCache(options => { options.SizeLimit = 1024; });
 
             // FluentValidation
             // usuarios
