@@ -35,7 +35,7 @@ namespace OpenBooks.Application.Services.Libros.Implementations
                         UsuarioId = usuarioId
                     };
                     await _unit.Bibliotecas.AddAsync(biblioteca);
-                    await _unit.CommitAsync(); 
+                    await _unit.CommitAsync();
                 }
 
                 var existente = await _unit.BibliotecaLibros.GetByIdsAsync(biblioteca.Id, libroId);

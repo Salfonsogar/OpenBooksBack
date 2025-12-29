@@ -17,6 +17,7 @@ using OpenBooks.Application.Validations.Lector;
 using OpenBooks.Application.Validations.Libros;
 using OpenBooks.Application.Validations.Usuarios;
 using OpenBooks.Domain.Entities.Usuarios;
+using MediatR;
 
 namespace OpenBooks.Application.Extensions
 {
@@ -50,7 +51,8 @@ namespace OpenBooks.Application.Extensions
             // Libros
             services.AddScoped<ICategoriaService, CategoriaService>();
             services.AddScoped<ILibroService, LibroService>();
-            // comentarios
+            services.AddScoped<IBibliotecaService, BibliotecaService>();
+            services.AddScoped<IEstanteriaService, EstanteriaService>(); 
 
             // Memory cache
             services.AddMemoryCache(options => { options.SizeLimit = 1024; });
