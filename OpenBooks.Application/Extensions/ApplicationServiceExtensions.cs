@@ -12,10 +12,13 @@ using OpenBooks.Application.Services.Libros.Implementations;
 using OpenBooks.Application.Services.Libros.Interfaces;
 using OpenBooks.Application.Services.Usuarios.Implementations;
 using OpenBooks.Application.Services.Usuarios.Interfaces;
+using OpenBooks.Application.Services.Comentarios.Implementations;
+using OpenBooks.Application.Services.Comentarios.Interfaces;
 using OpenBooks.Application.Validations.Auth;
 using OpenBooks.Application.Validations.Lector;
 using OpenBooks.Application.Validations.Libros;
 using OpenBooks.Application.Validations.Usuarios;
+using OpenBooks.Application.Validations.Comentarios;
 using OpenBooks.Domain.Entities.Usuarios;
 using MediatR;
 
@@ -48,11 +51,16 @@ namespace OpenBooks.Application.Extensions
             // usuarios
             services.AddScoped<IUsuarioService, UsuarioService>();
             services.AddScoped<IRolService, RolService>();
+            services.AddScoped<ISancionService, SancionService>();
             // Libros
             services.AddScoped<ICategoriaService, CategoriaService>();
             services.AddScoped<ILibroService, LibroService>();
             services.AddScoped<IBibliotecaService, BibliotecaService>();
             services.AddScoped<IEstanteriaService, EstanteriaService>(); 
+            // Comentarios
+            services.AddScoped<ISugerenciaService, SugerenciaService>();
+            services.AddScoped<IDenunciaService, DenunciaService>();
+            services.AddScoped<IResenaService, ResenaService>();
 
             // Memory cache
             services.AddMemoryCache(options => { options.SizeLimit = 1024; });
@@ -76,6 +84,13 @@ namespace OpenBooks.Application.Extensions
             services.AddValidatorsFromAssemblyContaining<LibroUpdateValidator>();
             services.AddValidatorsFromAssemblyContaining<LibroPatchValidator>();
             services.AddValidatorsFromAssemblyContaining<GetBookManifestValidator>();
+            // comentarios
+            services.AddValidatorsFromAssemblyContaining<SugerenciaCreateValidator>();
+            services.AddValidatorsFromAssemblyContaining<DenunciaCreateValidator>();
+            services.AddValidatorsFromAssemblyContaining<ResenaCreateValidator>();
+            services.AddValidatorsFromAssemblyContaining<ResenaUpdateValidator>();
+            services.AddValidatorsFromAssemblyContaining<SancionCreateValidator>();
+            services.AddValidatorsFromAssemblyContaining<SancionUpdateValidator>();
 
             return services;
         }

@@ -49,4 +49,54 @@ namespace OpenBooks.Application.DTOs.Lector
         public string MediaType { get; set; } = "application/octet-stream";
         public string FileName { get; set; } = string.Empty;
     }
+
+    public class LocationsDto
+    {
+        public int? Position { get; set; }
+        public decimal? Progression { get; set; }
+        public decimal? TotalProgression { get; set; }
+        public string? Fragment { get; set; }
+    }
+
+    public class LocatorDto
+    {
+        public string Href { get; set; } = string.Empty;
+        public string? Type { get; set; }
+        public string? Title { get; set; }
+        public LocationsDto? Locations { get; set; }
+        public string? Text { get; set; }
+    }
+
+    public class ProgressDto
+    {
+        public int LibroUsuarioId { get; set; }
+        public LocatorDto? CurrentLocator { get; set; }
+        public decimal? Progression { get; set; }
+        public DateTime? LastReadAt { get; set; }
+    }
+
+    public class MarcadorDto
+    {
+        public int Id { get; set; }
+        public int LibroUsuarioId { get; set; }
+        public string? Label { get; set; }
+        public LocatorDto Locator { get; set; } = new LocatorDto();
+        public string? Metadata { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+
+    public class ResaltadoDto
+    {
+        public int Id { get; set; }
+        public int LibroUsuarioId { get; set; }
+        public LocatorDto LocatorStart { get; set; } = new LocatorDto();
+        public LocatorDto LocatorEnd { get; set; } = new LocatorDto();
+        public string SelectedText { get; set; } = string.Empty;
+        public string? Context { get; set; }
+        public string? Note { get; set; }
+        public string Color { get; set; } = "#ffeb3b";
+        public string Type { get; set; } = "highlight";
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
 }

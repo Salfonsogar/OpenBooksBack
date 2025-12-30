@@ -1,7 +1,10 @@
-﻿using OpenBooks.Application.Interfaces.Persistence.Usuarios;
-using OpenBooks.Application.Interfaces.Persistence.Auth;
-using OpenBooks.Application.Interfaces.Persistence.Libros;
+﻿using OpenBooks.Application.Interfaces.Persistence.Auth;
 using OpenBooks.Application.Interfaces.Persistence.Comentarios;
+using OpenBooks.Application.Interfaces.Persistence.Libros;
+using OpenBooks.Application.Interfaces.Persistence.Usuarios;
+using OpenBooks.Application.Interfaces.Persistence.Lector;
+using System;
+using System.Threading.Tasks;
 
 namespace OpenBooks.Application.Common
 {
@@ -25,6 +28,10 @@ namespace OpenBooks.Application.Common
         IDenunciaRepository Denuncias { get; }
         IResenaRepository Resenas { get; }
         ISugerenciaRepository Sugerencias { get; }
+
+        ILibroUsuarioRepository LibroUsuarios { get; }
+        IMarcadorRepository Marcadores { get; }
+        IResaltadoRepository Resaltados { get; }
 
         Task<int> CommitAsync();
     }

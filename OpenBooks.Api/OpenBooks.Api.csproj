@@ -19,8 +19,4 @@
     <ProjectReference Include="..\OpenBooks.Infrastructure\OpenBooks.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\Comentarios\" />
-  </ItemGroup>
-
 </Project>

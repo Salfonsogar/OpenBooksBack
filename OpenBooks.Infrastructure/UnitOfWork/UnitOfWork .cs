@@ -2,10 +2,13 @@
 using OpenBooks.Application.Common;
 using OpenBooks.Application.Interfaces.Persistence.Auth;
 using OpenBooks.Application.Interfaces.Persistence.Comentarios;
+using OpenBooks.Application.Interfaces.Persistence.Lector;
 using OpenBooks.Application.Interfaces.Persistence.Libros;
 using OpenBooks.Application.Interfaces.Persistence.Usuarios;
+using OpenBooks.Domain.Entities.Lector;
 using OpenBooks.Infrastructure.Repository.Implementations.Auth;
 using OpenBooks.Infrastructure.Repository.Implementations.Comentarios;
+using OpenBooks.Infrastructure.Repository.Implementations.Lector;
 using OpenBooks.Infrastructure.Repository.Implementations.Libros;
 using OpenBooks.Infrastructure.Repository.Implementations.Usuarios;
 using OpenBooksBack.Infrastructure.Data;
@@ -34,6 +37,9 @@ namespace OpenBooksBack.Infrastructure.UnitOfWork
         public IDenunciaRepository Denuncias { get; }
         public IResenaRepository Resenas { get; }
         public ISugerenciaRepository Sugerencias { get; }
+        public ILibroUsuarioRepository LibroUsuarios { get; }
+        public IMarcadorRepository Marcadores { get; }
+        public IResaltadoRepository Resaltados { get; }
 
         public UnitOfWork(OpenBooksContext context)
         {
@@ -50,6 +56,9 @@ namespace OpenBooksBack.Infrastructure.UnitOfWork
             Categorias = new CategoriaRepository(context);
             Libros = new LibroRepository(context);
             LibroCategorias = new LibroCategoriaRepository(context);
+            LibroUsuarios = new LibroUsuarioRepository(context);
+            Marcadores = new MarcadorRepository(context);
+            Resaltados = new ResaltadoRepository(context);
 
             Estanterias = new EstanteriaRepository(context);
             EstanteriaLibros = new EstanteriaLibroRepository(context);
@@ -57,6 +66,7 @@ namespace OpenBooksBack.Infrastructure.UnitOfWork
             Denuncias = new DenunciaRepository(context);
             Resenas = new ResenaRepository(context);
             Sugerencias = new SugerenciaRepository(context);
+
         }
 
         public async Task<int> CommitAsync() => await _context.SaveChangesAsync();
