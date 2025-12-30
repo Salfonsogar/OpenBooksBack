@@ -5,10 +5,6 @@ using OpenBooks.Application.DTOs.Libros;
 using OpenBooks.Application.DTOs.Usuarios;
 using OpenBooks.Application.Services.Libros.Interfaces;
 using OpenBooks.Domain.Entities.Libros;
-using OpenBooksBack.Infrastructure.UnitOfWork;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace OpenBooks.Application.Services.Libros.Implementations
 {

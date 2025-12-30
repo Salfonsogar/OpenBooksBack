@@ -1,10 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using OpenBooks.Application.DTOs.Libros;
+using OpenBooks.Application.Interfaces.Persistence.Libros;
 using OpenBooks.Domain.Entities.Libros;
-using OpenBooks.Infrastructure.Repository.Interfaces.Libros;
 using OpenBooksBack.Infrastructure.Data;
 using OpenBooksBack.Infrastructure.Repositories;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace OpenBooks.Infrastructure.Repository.Implementations.Libros
 {
@@ -14,7 +13,6 @@ namespace OpenBooks.Infrastructure.Repository.Implementations.Libros
             : base(context)
         {
         }
-
         public async Task<Libro?> GetByIdWithCategoriasAsync(int id)
         {
             return await _context.Libros
@@ -34,6 +32,28 @@ namespace OpenBooks.Infrastructure.Repository.Implementations.Libros
                 l => l.EstanteriaLibros
             )
             .FirstOrDefaultAsync();
+        }
+        public async Task<LibroDetailDto?> GetDetailAsync(int libroId)
+        {
+            return await _context.Libros
+                .AsNoTracking()
+                .Where(l => l.Id == libroId)
+                .Select(l => new LibroDetailDto
+                {
+                    Id = l.Id,
+                    Titulo = l.Titulo,
+                    Autor = l.Autor,
+                    Descripcion = l.Descripcion,
+                    FechaPublicacion = l.FechaPublicacion,
+                    ValoracionPromedio = l.ValoracionPromedio,
+                    Portada = l.Portada,
+                    Categorias = l.LibroCategorias.Select(lc => new LibroCategoriaDto
+                    {
+                        CategoriaId = lc.CategoriaId,
+                        Nombre = lc.Categoria.Nombre
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
         }
     }
 }

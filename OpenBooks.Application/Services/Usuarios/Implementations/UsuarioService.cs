@@ -2,10 +2,9 @@
 using FluentValidation;
 using OpenBooks.Application.Common;
 using OpenBooks.Application.DTOs.Usuarios;
+using OpenBooks.Application.Interfaces.Services.Auth.Interfaces;
 using OpenBooks.Application.Services.Usuarios.Interfaces;
 using OpenBooks.Domain.Entities.Usuarios;
-using OpenBooks.Infrastructure.Services.Auth.Interfaces;
-using OpenBooksBack.Infrastructure.UnitOfWork;
 
 namespace OpenBooks.Application.Services.Usuarios.Implementations
 {

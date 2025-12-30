@@ -1,10 +1,8 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using OpenBooks.Api.Controllers.Auth;
 using OpenBooks.Api.Middlewares;
 using OpenBooks.Application.Extensions;
 using OpenBooks.Infrastructure.Extensions;
-using static Org.BouncyCastle.Math.EC.ECCurve;
 
 var builder = WebApplication.CreateBuilder(args);
 //services

@@ -22,6 +22,7 @@ namespace OpenBooks.Application.Validations.Libros
 
             RuleForEach(x => x.CategoriasIds)
                 .GreaterThan(0).WithMessage("El id de la categoría no es válido");
+            
 
             RuleFor(x => x.Archivo)
                 .NotNull().WithMessage("El archivo del libro es obligatorio");

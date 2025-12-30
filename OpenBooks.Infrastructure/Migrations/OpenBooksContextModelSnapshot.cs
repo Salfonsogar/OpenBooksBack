@@ -264,7 +264,7 @@ namespace OpenBooks.Infrastructure.Migrations
                         .HasColumnType("character varying(2000)");
 
                     b.Property<DateTime>("FechaPublicacion")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<byte[]>("Portada")
                         .HasColumnType("bytea");

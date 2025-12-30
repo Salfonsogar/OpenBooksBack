@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Caching.Memory;
 using OpenBooks.Application.Handlers.Auth;
+using OpenBooks.Application.Handlers.Lector;
 using OpenBooks.Application.Profiles.Libros;
 using OpenBooks.Application.Profiles.Usuarios;
 using OpenBooks.Application.Services.Auth;
@@ -10,10 +12,15 @@ using OpenBooks.Application.Services.Libros.Implementations;
 using OpenBooks.Application.Services.Libros.Interfaces;
 using OpenBooks.Application.Services.Usuarios.Implementations;
 using OpenBooks.Application.Services.Usuarios.Interfaces;
+using OpenBooks.Application.Services.Comentarios.Implementations;
+using OpenBooks.Application.Services.Comentarios.Interfaces;
 using OpenBooks.Application.Validations.Auth;
+using OpenBooks.Application.Validations.Lector;
 using OpenBooks.Application.Validations.Libros;
 using OpenBooks.Application.Validations.Usuarios;
+using OpenBooks.Application.Validations.Comentarios;
 using OpenBooks.Domain.Entities.Usuarios;
+using MediatR;
 
 namespace OpenBooks.Application.Extensions
 {
@@ -32,7 +39,9 @@ namespace OpenBooks.Application.Extensions
             // MediatR
             services.AddMediatR(cfg => { 
                 cfg.RegisterServicesFromAssembly(typeof(GenerateRefreshTokenHandler).Assembly);
-                cfg.RegisterServicesFromAssembly(typeof(ForgotPasswordHandler).Assembly); 
+                cfg.RegisterServicesFromAssembly(typeof(ForgotPasswordHandler).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(GetBookManifestHandler).Assembly);
+                cfg.RegisterServicesFromAssembly(typeof(GetBookResourceHandler).Assembly);
             });
 
             // Services
@@ -42,10 +51,19 @@ namespace OpenBooks.Application.Extensions
             // usuarios
             services.AddScoped<IUsuarioService, UsuarioService>();
             services.AddScoped<IRolService, RolService>();
+            services.AddScoped<ISancionService, SancionService>();
             // Libros
             services.AddScoped<ICategoriaService, CategoriaService>();
             services.AddScoped<ILibroService, LibroService>();
-            // comentarios
+            services.AddScoped<IBibliotecaService, BibliotecaService>();
+            services.AddScoped<IEstanteriaService, EstanteriaService>(); 
+            // Comentarios
+            services.AddScoped<ISugerenciaService, SugerenciaService>();
+            services.AddScoped<IDenunciaService, DenunciaService>();
+            services.AddScoped<IResenaService, ResenaService>();
+
+            // Memory cache
+            services.AddMemoryCache(options => { options.SizeLimit = 1024; });
 
             // FluentValidation
             // usuarios
@@ -65,6 +83,14 @@ namespace OpenBooks.Application.Extensions
             services.AddValidatorsFromAssemblyContaining<LibroCreateValidator>();
             services.AddValidatorsFromAssemblyContaining<LibroUpdateValidator>();
             services.AddValidatorsFromAssemblyContaining<LibroPatchValidator>();
+            services.AddValidatorsFromAssemblyContaining<GetBookManifestValidator>();
+            // comentarios
+            services.AddValidatorsFromAssemblyContaining<SugerenciaCreateValidator>();
+            services.AddValidatorsFromAssemblyContaining<DenunciaCreateValidator>();
+            services.AddValidatorsFromAssemblyContaining<ResenaCreateValidator>();
+            services.AddValidatorsFromAssemblyContaining<ResenaUpdateValidator>();
+            services.AddValidatorsFromAssemblyContaining<SancionCreateValidator>();
+            services.AddValidatorsFromAssemblyContaining<SancionUpdateValidator>();
 
             return services;
         }

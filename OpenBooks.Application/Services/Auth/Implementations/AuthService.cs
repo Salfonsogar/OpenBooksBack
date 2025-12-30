@@ -1,14 +1,12 @@
 ﻿using AutoMapper;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 using OpenBooks.Application.Common;
 using OpenBooks.Application.DTOs.Auth;
 using OpenBooks.Application.DTOs.Usuarios;
 using OpenBooks.Application.Services.Auth.Interfaces;
 using OpenBooks.Domain.Entities.Auth;
 using OpenBooks.Domain.Entities.Usuarios;
-using OpenBooks.Infrastructure.Services.Auth.Interfaces;
-using OpenBooksBack.Infrastructure.UnitOfWork;
+using OpenBooks.Application.Interfaces.Services.Auth.Interfaces;
 
 namespace OpenBooks.Application.Services.Auth.Implementations
 {
@@ -75,9 +73,9 @@ namespace OpenBooks.Application.Services.Auth.Implementations
         }
         private async Task<Result<Usuario>> AuthenticateAsync(LoginRequestDto dto)
         {
-            var usuario = await _unit.Usuarios
+            var usuario =  _unit.Usuarios
                 .Query(u => u.Correo == dto.Correo, u => u.Rol)
-                .FirstOrDefaultAsync();
+                .FirstOrDefault();
 
             if (usuario == null ||
                 !BCrypt.Net.BCrypt.Verify(dto.Contrasena, usuario.Contrasena))

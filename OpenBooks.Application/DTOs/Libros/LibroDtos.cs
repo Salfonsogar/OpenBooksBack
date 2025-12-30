@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using OpenBooks.Application.Common;
 
 namespace OpenBooks.Application.DTOs.Libros
 {
@@ -8,14 +6,15 @@ namespace OpenBooks.Application.DTOs.Libros
     {
         public string Titulo { get; set; } = string.Empty;
         public string Autor { get; set; } = string.Empty;
-        public string Descripcion { get; set; } = string.Empty;
+        public string? Descripcion { get; set; }
 
-        public byte[]? Portada { get; set; }
-        public byte[]? Archivo { get; set; }
+        public byte[] Portada { get; set; } = Array.Empty<byte>();
+        public byte[] Archivo { get; set; } = Array.Empty<byte>();
 
         public DateTime FechaPublicacion { get; set; }
         public ICollection<int> CategoriasIds { get; set; } = new List<int>();
     }
+
 
     public class LibroUpdateDto
     {
@@ -63,4 +62,19 @@ namespace OpenBooks.Application.DTOs.Libros
         public byte[]? Portada { get; set; }
         public decimal ValoracionPromedio { get; set; }
     }
+    public class LibroSearchParams : PaginationParams
+    {
+        public string? Search { get; set; }  
+        public int? CategoriaId { get; set; }
+        public string? Autor { get; set; }
+        public LibroOrderBy? OrderBy { get; set; }
+    }
+    public enum LibroOrderBy
+    {
+        TituloAsc,
+        TituloDesc,
+        ValoracionAsc,
+        ValoracionDesc
+    }
+
 }
