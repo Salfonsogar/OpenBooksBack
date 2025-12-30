@@ -66,5 +66,43 @@ namespace OpenBooks.Api.Controllers.Auth
 
             return Ok(result.Data);
         }
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            if (request == null ||
+                string.IsNullOrWhiteSpace(request.Email) ||
+                string.IsNullOrWhiteSpace(request.Token) ||
+                string.IsNullOrWhiteSpace(request.NewPassword))
+            {
+                return BadRequest("Email, token y nueva contraseña son obligatorios");
+            }
+
+            var cmd = new ResetPasswordCommand
+            {
+                Email = request.Email,
+                Token = request.Token,
+                NewPassword = request.NewPassword
+            };
+
+            var result = await _mediator.Send(cmd);
+
+            if (!result)
+                return BadRequest("Token inválido o no se pudo restablecer la contraseña");
+
+            return NoContent();
+        }
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Email))
+                return BadRequest("El email es obligatorio");
+
+            var cmd = new ForgotPasswordCommand { Email = request.Email };
+            var result = await _mediator.Send(cmd);
+
+            if (!result)
+                return BadRequest("No se pudo procesar la solicitud");
+            return NoContent();
+        }
     }
 }
